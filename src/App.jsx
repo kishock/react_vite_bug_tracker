@@ -26,6 +26,7 @@ const TRANSLATIONS = {
     logoSubtitle: "이슈 대시보드",
     menuList: "목록",
     menuSetting: "설정",
+    menuUsers: "사용자",
     logout: "로그아웃",
     settingTitle: "설정",
     settingThemeDesc: "테마 모드를 선택할 수 있습니다.",
@@ -105,6 +106,17 @@ const TRANSLATIONS = {
     of: "/",
     issuesUnit: "건",
     userRole: "역할",
+    usersTitle: "사용자 관리",
+    usersListTitle: "사용자 목록",
+    usersId: "아이디",
+    usersAssignedCount: "할당 이슈",
+    usersEditTitle: "사용자 정보 수정",
+    usersPassword: "비밀번호",
+    usersSave: "저장",
+    usersNoSelection: "목록에서 사용자를 선택하세요.",
+    usersAssignedIssuesTitle: "할당된 버그 이슈",
+    usersNoAssigned: "할당된 이슈가 없습니다.",
+    usersIssueByStatus: "상태",
     roles: {
       Developer: "개발자",
       QA: "QA",
@@ -120,6 +132,7 @@ const TRANSLATIONS = {
     logoSubtitle: "Issue Dashboard",
     menuList: "List",
     menuSetting: "Setting",
+    menuUsers: "Users",
     logout: "Logout",
     settingTitle: "Setting",
     settingThemeDesc: "Choose your theme mode.",
@@ -200,6 +213,17 @@ const TRANSLATIONS = {
     of: "of",
     issuesUnit: "issues",
     userRole: "Role",
+    usersTitle: "User Management",
+    usersListTitle: "Users",
+    usersId: "ID",
+    usersAssignedCount: "Assigned Issues",
+    usersEditTitle: "Edit User",
+    usersPassword: "Password",
+    usersSave: "Save",
+    usersNoSelection: "Select a user from the list.",
+    usersAssignedIssuesTitle: "Assigned Bug Issues",
+    usersNoAssigned: "No assigned issues.",
+    usersIssueByStatus: "Status",
     roles: {
       Developer: "Developer",
       QA: "QA",
@@ -330,6 +354,12 @@ function App() {
   const [commentDraft, setCommentDraft] = useState("");
   // 수정 중인 코멘트 id. null이면 신규 코멘트 등록 모드.
   const [editingCommentId, setEditingCommentId] = useState(null);
+  // Users 화면에서 선택한 사용자와 수정 draft 상태.
+  const [selectedUserId, setSelectedUserId] = useState("");
+  const [userEditForm, setUserEditForm] = useState({
+    password: "",
+    role: "Customer",
+  });
   // 수정 중인 버그 id. null이면 새 버그 등록 모드.
   const [editingBugId, setEditingBugId] = useState(null);
 
@@ -379,6 +409,14 @@ function App() {
   const editingBug = useMemo(
     () => bugs.find((bug) => bug.id === editingBugId) || null,
     [bugs, editingBugId],
+  );
+  const selectedUser = useMemo(
+    () => users.find((user) => user.username === selectedUserId) || null,
+    [users, selectedUserId],
+  );
+  const assignedIssuesForSelectedUser = useMemo(
+    () => bugs.filter((bug) => bug.assigneeId === selectedUserId),
+    [bugs, selectedUserId],
   );
 
   const filteredBugs = useMemo(() => {
@@ -613,6 +651,33 @@ function App() {
     }
   };
 
+  // Users 메뉴에서 특정 사용자를 선택해 편집 draft를 채운다.
+  const selectUserForManage = (user) => {
+    setSelectedUserId(user.username);
+    setUserEditForm({
+      password: user.password,
+      role: user.role,
+    });
+  };
+
+  // Users 메뉴에서 비밀번호/역할 변경을 저장한다.
+  const saveUserProfile = () => {
+    if (!selectedUserId) {
+      return;
+    }
+    const nextPassword = userEditForm.password.trim();
+    if (!nextPassword) {
+      return;
+    }
+    setUsers((prev) =>
+      prev.map((user) =>
+        user.username === selectedUserId
+          ? { ...user, password: nextPassword, role: userEditForm.role }
+          : user,
+      ),
+    );
+  };
+
   // 로그인/회원가입/비밀번호 재설정 공용 제출 핸들러.
   const handleAuthSubmit = (event) => {
     event.preventDefault();
@@ -732,6 +797,13 @@ function App() {
           >
             {t.menuSetting}
           </button>
+          <button
+            type="button"
+            className={screen === "users" ? "menu-item active" : "menu-item"}
+            onClick={() => setScreen("users")}
+          >
+            {t.menuUsers}
+          </button>
         </nav>
 
         <div className="user-box">
@@ -809,6 +881,107 @@ function App() {
               >
                 {t.english}
               </button>
+            </div>
+          </section>
+        ) : null}
+
+        {screen === "users" ? (
+          <section className="panel users-page">
+            <h2>{t.usersTitle}</h2>
+            <div className="users-grid">
+              <section className="users-list">
+                <h3>{t.usersListTitle}</h3>
+                <ul>
+                  {users.map((user) => {
+                    const assignedCount = bugs.filter(
+                      (bug) => bug.assigneeId === user.username,
+                    ).length;
+                    return (
+                      <li key={user.username}>
+                        <button
+                          type="button"
+                          className={
+                            selectedUserId === user.username
+                              ? "user-row active"
+                              : "user-row"
+                          }
+                          onClick={() => selectUserForManage(user)}
+                        >
+                          <span>@{user.username}</span>
+                          <span>{t.roles[user.role]}</span>
+                          <span>
+                            {t.usersAssignedCount}: {assignedCount}
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+
+              <section className="users-edit">
+                <h3>{t.usersEditTitle}</h3>
+                {!selectedUser ? (
+                  <p className="empty">{t.usersNoSelection}</p>
+                ) : (
+                  <>
+                    <p className="muted">
+                      {t.usersId}: @{selectedUser.username}
+                    </p>
+                    <label>
+                      {t.usersPassword}
+                      <input
+                        type="text"
+                        value={userEditForm.password}
+                        onChange={(event) =>
+                          setUserEditForm((prev) => ({
+                            ...prev,
+                            password: event.target.value,
+                          }))
+                        }
+                      />
+                    </label>
+                    <label>
+                      {t.userRole}
+                      <select
+                        value={userEditForm.role}
+                        onChange={(event) =>
+                          setUserEditForm((prev) => ({
+                            ...prev,
+                            role: event.target.value,
+                          }))
+                        }
+                      >
+                        {ROLE_OPTIONS.map((role) => (
+                          <option key={role} value={role}>
+                            {t.roles[role]}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <button type="button" onClick={saveUserProfile}>
+                      {t.usersSave}
+                    </button>
+
+                    <h3 className="users-assigned-title">{t.usersAssignedIssuesTitle}</h3>
+                    {assignedIssuesForSelectedUser.length === 0 ? (
+                      <p className="empty">{t.usersNoAssigned}</p>
+                    ) : (
+                      <ul className="users-assigned-list">
+                        {assignedIssuesForSelectedUser.map((issue) => (
+                          <li key={issue.id}>
+                            <p>{issue.title}</p>
+                            <p className="muted">
+                              {t.usersIssueByStatus}:{" "}
+                              {t.statusLabels[issue.status] || issue.status}
+                            </p>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </>
+                )}
+              </section>
             </div>
           </section>
         ) : null}

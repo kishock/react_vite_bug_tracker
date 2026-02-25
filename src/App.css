@@ -38,6 +38,12 @@
   font-size: 0.85rem;
 }
 
+.auth-info {
+  margin: 0;
+  color: #1d6f42;
+  font-size: 0.85rem;
+}
+
 .auth-submit {
   margin-top: 0.2rem;
 }
@@ -697,6 +703,10 @@ button {
 
 .theme-dark .auth-switch {
   color: #9db0cf;
+}
+
+.theme-dark .auth-info {
+  color: #7fd9ae;
 }
 
 .layout.theme-dark .board-column {

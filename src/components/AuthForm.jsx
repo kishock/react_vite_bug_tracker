@@ -9,15 +9,17 @@ function AuthForm({
   setAuthForm,
   onSubmit,
   errorMessage,
+  infoMessage,
 }) {
   const isLogin = mode === "login";
+  const isForgot = mode === "forgot";
 
   return (
     <section className="auth-card">
       <p className="auth-badge">Bug Tracker</p>
-      <h1>{isLogin ? t.authLogin : t.authSignup}</h1>
+      <h1>{isLogin ? t.authLogin : isForgot ? t.authForgot : t.authSignup}</h1>
       <p className="muted">
-        {isLogin ? t.authOnlyMsg : t.authCreateMsg}
+        {isLogin ? t.authOnlyMsg : isForgot ? t.authForgotMsg : t.authCreateMsg}
       </p>
 
       <form className="form" onSubmit={onSubmit}>
@@ -45,7 +47,7 @@ function AuthForm({
             required
           />
         </label>
-        {!isLogin ? (
+        {!isLogin && !isForgot ? (
           <label>
             {t.authRole}
             <select
@@ -64,8 +66,9 @@ function AuthForm({
         ) : null}
 
         {errorMessage ? <p className="auth-error">{errorMessage}</p> : null}
+        {infoMessage ? <p className="auth-info">{infoMessage}</p> : null}
         <button type="submit" className="auth-submit">
-          {isLogin ? t.authLogin : t.authCreateAccount}
+          {isLogin ? t.authLogin : isForgot ? t.authResetPassword : t.authCreateAccount}
         </button>
       </form>
 
@@ -79,6 +82,18 @@ function AuthForm({
           {isLogin ? t.authSignup : t.authLogin}
         </button>
       </div>
+      {isLogin ? (
+        <div className="auth-switch">
+          {t.authForgotHint}
+          <button
+            type="button"
+            className="ghost"
+            onClick={() => setMode("forgot")}
+          >
+            {t.authForgot}
+          </button>
+        </div>
+      ) : null}
     </section>
   );
 }

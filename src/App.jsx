@@ -39,17 +39,23 @@ const TRANSLATIONS = {
     createBug: "+ 버그 등록",
     authLogin: "로그인",
     authSignup: "회원가입",
+    authForgot: "비밀번호 찾기",
     authOnlyMsg: "로그인한 사용자만 대시보드를 사용할 수 있습니다.",
     authCreateMsg: "아이디와 비밀번호를 등록해 계정을 생성하세요.",
+    authForgotMsg: "아이디와 새 비밀번호를 입력해 비밀번호를 재설정하세요.",
     authLoginId: "로그인 아이디",
     authPassword: "비밀번호",
     authRole: "회원 구분",
     authNoAccount: "계정이 없나요?",
     authHasAccount: "이미 계정이 있나요?",
+    authForgotHint: "비밀번호를 잊으셨나요?",
     authCreateAccount: "계정 생성",
+    authResetPassword: "비밀번호 재설정",
     authErrorRequired: "아이디와 비밀번호를 입력해주세요.",
     authErrorTaken: "이미 사용 중인 아이디입니다.",
     authErrorInvalid: "아이디 또는 비밀번호가 올바르지 않습니다.",
+    authErrorNoUser: "해당 아이디를 찾을 수 없습니다.",
+    authResetDone: "비밀번호가 재설정되었습니다. 로그인해 주세요.",
     formCreateTitle: "버그 등록",
     formEditTitle: "버그 수정",
     formBack: "목록으로",
@@ -126,17 +132,23 @@ const TRANSLATIONS = {
     createBug: "+ Create Bug",
     authLogin: "Login",
     authSignup: "Sign Up",
+    authForgot: "Forgot Password",
     authOnlyMsg: "Only logged-in users can use this dashboard.",
     authCreateMsg: "Create an account with your login ID and password.",
+    authForgotMsg: "Enter your login ID and new password to reset it.",
     authLoginId: "Login ID",
     authPassword: "Password",
     authRole: "Role",
     authNoAccount: "No account yet?",
     authHasAccount: "Already have an account?",
+    authForgotHint: "Forgot your password?",
     authCreateAccount: "Create Account",
+    authResetPassword: "Reset Password",
     authErrorRequired: "Please enter both login ID and password.",
     authErrorTaken: "This login ID is already in use.",
     authErrorInvalid: "Login ID or password is incorrect.",
+    authErrorNoUser: "No account found with this login ID.",
+    authResetDone: "Password reset complete. Please log in.",
     formCreateTitle: "Create Bug",
     formEditTitle: "Edit Bug",
     formBack: "Back to List",
@@ -311,6 +323,7 @@ function App() {
     role: "Customer",
   });
   const [authError, setAuthError] = useState("");
+  const [authInfo, setAuthInfo] = useState("");
   // 코멘트 입력창의 draft 텍스트.
   const [commentDraft, setCommentDraft] = useState("");
   // 수정 중인 코멘트 id. null이면 신규 코멘트 등록 모드.
@@ -598,11 +611,12 @@ function App() {
     }
   };
 
-  // 로그인/회원가입 공용 제출 핸들러.
+  // 로그인/회원가입/비밀번호 재설정 공용 제출 핸들러.
   const handleAuthSubmit = (event) => {
     event.preventDefault();
     const username = authForm.username.trim();
     const password = authForm.password.trim();
+    setAuthInfo("");
 
     if (!username || !password) {
       setAuthError(t.authErrorRequired);
@@ -619,6 +633,24 @@ function App() {
       setCurrentUser(username);
       setAuthForm({ username: "", password: "", role: "Customer" });
       setAuthError("");
+      return;
+    }
+
+    if (authMode === "forgot") {
+      const exists = users.some((user) => user.username === username);
+      if (!exists) {
+        setAuthError(t.authErrorNoUser);
+        return;
+      }
+      setUsers((prev) =>
+        prev.map((user) =>
+          user.username === username ? { ...user, password } : user,
+        ),
+      );
+      setAuthForm({ username: "", password: "", role: "Customer" });
+      setAuthError("");
+      setAuthInfo(t.authResetDone);
+      setAuthMode("login");
       return;
     }
 
@@ -641,6 +673,7 @@ function App() {
     setEditingBugId(null);
     setForm(initialForm);
     setAuthForm({ username: "", password: "", role: "Customer" });
+    setAuthInfo("");
     setScreen("list");
     setAuthMode("login");
   };
@@ -655,12 +688,14 @@ function App() {
           setMode={(nextMode) => {
             setAuthMode(nextMode);
             setAuthError("");
+            setAuthInfo("");
             setAuthForm((prev) => ({ ...prev, role: "Customer" }));
           }}
           authForm={authForm}
           setAuthForm={setAuthForm}
           onSubmit={handleAuthSubmit}
           errorMessage={authError}
+          infoMessage={authInfo}
         />
       </main>
     );

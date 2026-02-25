@@ -49,6 +49,7 @@ jobs:
           CODE=$?
           echo "$OUTPUT"
           if [ $CODE -ne 0 ]; then
-            echo "::error::$OUTPUT"
+            SANITIZED_OUTPUT=$(echo "$OUTPUT" | tr '\n' ' ' | tr -s ' ')
+            echo "::error::$SANITIZED_OUTPUT"
             exit $CODE
           fi

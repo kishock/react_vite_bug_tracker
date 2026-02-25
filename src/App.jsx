@@ -970,11 +970,17 @@ function App() {
                       <ul className="users-assigned-list">
                         {assignedIssuesForSelectedUser.map((issue) => (
                           <li key={issue.id}>
-                            <p>{issue.title}</p>
-                            <p className="muted">
-                              {t.usersIssueByStatus}:{" "}
-                              {t.statusLabels[issue.status] || issue.status}
-                            </p>
+                            <button
+                              type="button"
+                              className="assigned-issue-btn"
+                              onClick={() => selectBugForEdit(issue)}
+                            >
+                              <p>{issue.title}</p>
+                              <p className="muted">
+                                {t.usersIssueByStatus}:{" "}
+                                {t.statusLabels[issue.status] || issue.status}
+                              </p>
+                            </button>
                           </li>
                         ))}
                       </ul>

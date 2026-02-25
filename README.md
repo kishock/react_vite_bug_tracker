@@ -1,5 +1,6 @@
 # Bug Tracker Dashboard
 
+Live Demo:
 https://react-vite-bug-tracker.pages.dev/
 
 React + Vite 기반의 버그 트래킹 대시보드입니다.  

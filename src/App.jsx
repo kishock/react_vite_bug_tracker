@@ -46,6 +46,7 @@ const TRANSLATIONS = {
     authLoginId: "로그인 아이디",
     authPassword: "비밀번호",
     authRole: "회원 구분",
+    authLanguage: "언어",
     authNoAccount: "계정이 없나요?",
     authHasAccount: "이미 계정이 있나요?",
     authForgotHint: "비밀번호를 잊으셨나요?",
@@ -139,6 +140,7 @@ const TRANSLATIONS = {
     authLoginId: "Login ID",
     authPassword: "Password",
     authRole: "Role",
+    authLanguage: "Language",
     authNoAccount: "No account yet?",
     authHasAccount: "Already have an account?",
     authForgotHint: "Forgot your password?",
@@ -684,6 +686,8 @@ function App() {
         <AuthForm
           t={t}
           roleOptions={ROLE_OPTIONS}
+          language={language}
+          setLanguage={setLanguage}
           mode={authMode}
           setMode={(nextMode) => {
             setAuthMode(nextMode);

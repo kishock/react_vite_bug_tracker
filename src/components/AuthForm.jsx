@@ -3,6 +3,8 @@
 function AuthForm({
   t,
   roleOptions,
+  language,
+  setLanguage,
   mode,
   setMode,
   authForm,
@@ -94,6 +96,26 @@ function AuthForm({
           </button>
         </div>
       ) : null}
+
+      <div className="auth-language">
+        <span>{t.authLanguage}</span>
+        <div className="auth-language-actions">
+          <button
+            type="button"
+            className={language === "ko" ? "theme-option active" : "theme-option"}
+            onClick={() => setLanguage("ko")}
+          >
+            {t.korean}
+          </button>
+          <button
+            type="button"
+            className={language === "en" ? "theme-option active" : "theme-option"}
+            onClick={() => setLanguage("en")}
+          >
+            {t.english}
+          </button>
+        </div>
+      </div>
     </section>
   );
 }
